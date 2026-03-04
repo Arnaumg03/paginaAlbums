@@ -2,6 +2,8 @@ import { useState } from 'react'
 import './App.css'
 import badBunnyUnVerano from '../fotosAlbumsProva/Bad Bunny_Un Verano Sin Ti.png'
 import badBunnyYhlqmdlg from '../fotosAlbumsProva/Bad Bunny_YHLQMDLG.png'
+import badBunnyDebiTirarMasFotos1 from '../fotosAlbumsProva/13.png'
+import badBunnyDebiTirarMasFotos2 from '../fotosAlbumsProva/14.png'
 import moraEstrella from '../fotosAlbumsProva/Mora_ESTRELLA.png'
 import moraLoMismo from '../fotosAlbumsProva/Mora_LO MISMO DE SIEMPRE.png'
 import anuelEmmanuel from '../fotosAlbumsProva/Anuel AA_Emmanuel.png'
@@ -10,13 +12,11 @@ import quevedoBuenasNoches1 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_ 1.p
 import quevedoBuenasNoches2 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_2.png'
 
 function App() {
-  const [artist, setArtist] = useState('')
-  const [album, setAlbum] = useState('')
-  const [style, setStyle] = useState('minimal')
-  const [email, setEmail] = useState('')
-  const [notes, setNotes] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [status, setStatus] = useState(null)
+  const CONTACT_EMAIL = 'tu-email@ejemplo.com'
+  const [view, setView] = useState('list')
+  const [activeAlbum, setActiveAlbum] = useState(null)
+  const [frameSize, setFrameSize] = useState('30x40')
+  const [frameColor, setFrameColor] = useState('negro')
 
   const sampleAlbums = [
     {
@@ -30,6 +30,18 @@ function App() {
       album: 'YHLQMDLG',
       style: 'colorful',
       cover: badBunnyYhlqmdlg,
+    },
+    {
+      artist: 'Bad Bunny',
+      album: 'DEBI TIRAR MAS FOTOS',
+      style: 'colorful',
+      cover: badBunnyDebiTirarMasFotos1,
+    },
+    {
+      artist: 'Bad Bunny',
+      album: 'DEBI TIRAR MAS FOTOS',
+      style: 'colorful',
+      cover: badBunnyDebiTirarMasFotos2,
     },
     {
       artist: 'Mora',
@@ -70,249 +82,190 @@ function App() {
   ]
 
   function handleSelectSample(sample) {
-    setArtist(sample.artist)
-    setAlbum(sample.album)
-    setStyle(sample.style ?? 'minimal')
+    setActiveAlbum(sample)
+    setView('detail')
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault()
+  function handleBackToList() {
+    setView('list')
+    setActiveAlbum(null)
+  }
 
-    if (!artist.trim() || !album.trim()) {
-      setStatus({
-        type: 'error',
-        message: 'Pon al menos el artista y el álbum.',
-      })
-      return
-    }
+  function handleContact(sample, options) {
+    const subject = encodeURIComponent('Pedido cuadro personalizado de álbum')
+    const bodyLines = [
+      'Hola, quiero un cuadro personalizado.',
+      '',
+      sample ? `Ejemplo que me gusta: ${sample.artist} - ${sample.album}` : '',
+      '',
+      options ? `Tamaño de marco: ${options.frameSize}` : '',
+      options ? `Color de marco: ${options.frameColor}` : '',
+      '',
+      'Artista deseado:',
+      'Álbum deseado:',
+    ].join('\n')
 
-    setIsSending(true)
-    setStatus(null)
-
-    try {
-      // Ejemplo de cómo sería la llamada real:
-      //
-      // const response = await fetch('http://localhost:8000/generate-poster', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ artist, album, style, email, notes }),
-      // })
-      //
-      // if (!response.ok) throw new Error('Error al generar el póster')
-      //
-      // const blob = await response.blob()
-      // const url = URL.createObjectURL(blob)
-      // window.open(url, '_blank')
-
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      setStatus({
-        type: 'success',
-        message:
-          'Petición preparada. Cuando conectes el backend de Python, aquí se generará el PDF/imagen automáticamente.',
-      })
-    } catch (error) {
-      setStatus({
-        type: 'error',
-        message:
-          'Ha habido un problema al enviar la petición. Revisa el backend de Python cuando lo tengas configurado.',
-      })
-    } finally {
-      setIsSending(false)
-    }
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${encodeURIComponent(
+      bodyLines,
+    )}`
   }
 
   return (
     <div className="page">
       <header className="header">
         <div className="brand">
-          <span className="brand-mark">A4</span>
+          <span className="brand-mark">BF</span>
           <div>
-            <h1>Cuadros de música personalizados</h1>
-            <p>
-              Genera una hoja A4 con tu artista y álbum favoritos lista para
-              imprimir y enmarcar.
-            </p>
+            <h1>BeatFrames · Tienda de cuadros de álbumes</h1>
+            <p>Decora tu casa con portadas de tus discos favoritos, listas para colgar.</p>
           </div>
         </div>
-        <nav className="nav">
-          <a href="#formulario">Pedir cuadro</a>
-          <a href="#como-funciona">Cómo funciona</a>
-        </nav>
       </header>
 
-      <main>
-        <section className="hero">
-          <div>
-            <h2>Elige un artista, un álbum y crea tu póster A4</h2>
-            <p>
-              Esta web recoge los datos y se los pasa a tu script de Python que
-              genera la hoja A4 lista para imprimir.
-            </p>
-            <ul className="hero-list">
-              <li>Introduce artista, álbum y estilo del cuadro.</li>
-              <li>Tu script de Python genera el diseño en tamaño A4.</li>
-              <li>Imprimes la hoja y la metes en un marco estándar.</li>
-            </ul>
-            <a className="primary-button" href="#formulario">
-              Rellenar el formulario
-            </a>
-          </div>
-          <div className="hero-highlight">
-            <p className="hero-badge">Formato A4 listo para marco</p>
-            <p className="hero-price">Perfecto para regalos musicales</p>
-          </div>
-        </section>
-
-        <section className="gallery-section">
-          <div className="section-header">
-            <h3>Algunos ejemplos de cuadros</h3>
-            <p>
-              Haz clic en cualquiera de estos álbumes para rellenar el formulario con sus
-              datos y ver cómo quedaría tu cuadro.
-            </p>
-          </div>
-
-          <div className="album-grid">
-            {sampleAlbums.map((sample) => (
-              <button
-                key={`${sample.artist}-${sample.album}`}
-                type="button"
-                className="album-card"
-                onClick={() => handleSelectSample(sample)}
-              >
-                <div className="album-image-wrapper">
-                  <img
-                    src={sample.cover}
-                    alt={`${sample.artist} - ${sample.album}`}
-                    className="album-image"
-                  />
-                </div>
-                <div className="album-info">
-                  <p className="album-artist">{sample.artist}</p>
-                  <p className="album-title">{sample.album}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section id="formulario" className="form-section">
-          <div className="section-header">
-            <h3>Datos para tu cuadro</h3>
-            <p>
-              Rellena la información y después tu backend de Python generará el
-              archivo final.
-            </p>
-          </div>
-
-          <form className="poster-form" onSubmit={handleSubmit}>
-            <div className="form-grid">
-              <label className="field">
-                <span>Artista *</span>
-                <input
-                  type="text"
-                  placeholder="Ej: Radiohead"
-                  value={artist}
-                  onChange={(e) => setArtist(e.target.value)}
-                  required
-                />
-              </label>
-
-              <label className="field">
-                <span>Álbum *</span>
-                <input
-                  type="text"
-                  placeholder="Ej: OK Computer"
-                  value={album}
-                  onChange={(e) => setAlbum(e.target.value)}
-                  required
-                />
-              </label>
-
-              <label className="field">
-                <span>Estilo del cuadro</span>
-                <select
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value)}
-                >
-                  <option value="minimal">Minimalista</option>
-                  <option value="dark">Oscuro</option>
-                  <option value="colorful">Colorido</option>
-                  <option value="vintage">Vintage</option>
-                </select>
-              </label>
-
-              <label className="field">
-                <span>Email (opcional)</span>
-                <input
-                  type="email"
-                  placeholder="Para enviarte el archivo generado"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </label>
+      {view === 'list' && (
+        <main>
+          <section className="hero">
+            <div>
+              <h2>Cuadros premium de tus álbumes favoritos</h2>
+              <p>
+                Elige entre nuestros diseños de ejemplo o pídeme un cuadro totalmente
+                personalizado con el álbum que quieras.
+              </p>
+              <ul className="hero-list">
+                <li>Impresión en alta calidad en formato A4.</li>
+                <li>Opciones de marco en distintos tamaños y colores.</li>
+                <li>Perfecto para regalar o decorar tu estudio.</li>
+              </ul>
             </div>
+            <div className="hero-highlight">
+              <p className="hero-badge">Colección limitada</p>
+              <p className="hero-price">Desde 24,90 €</p>
+            </div>
+          </section>
 
-            <label className="field">
-              <span>Notas adicionales (opcional)</span>
-              <textarea
-                rows={3}
-                placeholder="Texto que quieras añadir, colores preferidos, etc."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-            </label>
-
-            <div className="form-footer">
-              <button className="primary-button" type="submit" disabled={isSending}>
-                {isSending ? 'Enviando datos…' : 'Enviar datos al generador'}
-              </button>
-              <p className="form-helper">
-                De momento esta demo sólo simula el envío. Cuando conectes el
-                backend de Python, aquí se llamará a tu script.
+          <section className="gallery-section">
+            <div className="section-header">
+              <h3>Colección destacada</h3>
+              <p>
+                Haz clic en cualquiera de estos cuadros para ver los detalles, elegir el
+                marco y solicitar tu pedido.
               </p>
             </div>
 
-            {status && (
-              <p
-                className={
-                  status.type === 'success' ? 'status status-success' : 'status status-error'
+            <div className="album-grid">
+              {sampleAlbums.map((sample) => (
+                <button
+                  key={`${sample.artist}-${sample.album}`}
+                  type="button"
+                  className="album-card"
+                  onClick={() => handleSelectSample(sample)}
+                >
+                  <div className="album-image-wrapper">
+                    <img
+                      src={sample.cover}
+                      alt={`${sample.artist} - ${sample.album}`}
+                      className="album-image"
+                    />
+                  </div>
+                  <div className="album-info">
+                    <p className="album-artist">{sample.artist}</p>
+                    <p className="album-title">{sample.album}</p>
+                    <p className="album-price">Desde 24,90 €</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="cta-section">
+            <h2>¿Quieres un cuadro de otro álbum?</h2>
+            <p>
+              Si te gustaría un cuadro con otro artista o disco, mándame un mensaje con los
+              detalles y te preparo un diseño personalizado.
+            </p>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => handleContact(null)}
+            >
+              Pedir cuadro personalizado
+            </button>
+          </section>
+        </main>
+      )}
+
+      {view === 'detail' && activeAlbum && (
+        <main className="product-page">
+          <button type="button" className="back-link" onClick={handleBackToList}>
+            ← Volver a la colección
+          </button>
+
+          <div className="product-layout">
+            <div className="product-image-panel">
+              <div className="product-image-wrapper">
+                <img
+                  src={activeAlbum.cover}
+                  alt={`${activeAlbum.artist} - ${activeAlbum.album}`}
+                  className="product-image"
+                />
+                <span className="product-watermark">MUESTRA</span>
+              </div>
+              <p className="product-note">
+                Las imágenes online incluyen una marca de agua para proteger el diseño. Tu
+                cuadro físico se entrega sin marca.
+              </p>
+            </div>
+
+            <div className="product-info">
+              <p className="product-artist">{activeAlbum.artist}</p>
+              <h2 className="product-title">{activeAlbum.album}</h2>
+              <p className="product-subtitle">Lámina A4 + marco personalizado</p>
+              <p className="product-price">Desde 24,90 €</p>
+
+              <div className="product-options">
+                <label className="field">
+                  <span>Tamaño del marco</span>
+                  <select
+                    value={frameSize}
+                    onChange={(event) => setFrameSize(event.target.value)}
+                  >
+                    <option value="21x30">21 x 30 cm (A4)</option>
+                    <option value="30x40">30 x 40 cm</option>
+                    <option value="40x50">40 x 50 cm</option>
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Color del marco</span>
+                  <select
+                    value={frameColor}
+                    onChange={(event) => setFrameColor(event.target.value)}
+                  >
+                    <option value="negro">Negro</option>
+                    <option value="blanco">Blanco</option>
+                    <option value="madera-clara">Madera clara</option>
+                    <option value="madera-oscura">Madera oscura</option>
+                  </select>
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="primary-button product-buy-button"
+                onClick={() =>
+                  handleContact(activeAlbum, { frameSize, frameColor })
                 }
               >
-                {status.message}
+                Continuar al pago por email
+              </button>
+              <p className="product-helper">
+                Te responderé con los pasos de pago y los detalles de envío según tus
+                preferencias.
               </p>
-            )}
-          </form>
-        </section>
-
-        <section id="como-funciona" className="info-section">
-          <h3>Cómo conectarlo con tu código de Python</h3>
-          <ol className="steps-list">
-            <li>
-              Crea un pequeño servidor en Python (por ejemplo con FastAPI o Flask) con
-              un endpoint <code>/generate-poster</code> que reciba{' '}
-              <code>artist</code>, <code>album</code>, <code>style</code>, etc.
-            </li>
-            <li>
-              Dentro de ese endpoint llama a tu función actual que genera la hoja A4
-              y devuelve el PDF o la imagen.
-            </li>
-            <li>
-              En este React, sustituye el bloque comentado del <code>fetch</code> por
-              la URL real de tu servidor Python (por ejemplo{' '}
-              <code>http://localhost:8000/generate-poster</code>).
-            </li>
-          </ol>
-        </section>
-      </main>
-
-      <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} Cuadros de música personalizados. Integrado con
-          tu generador en Python.
-        </p>
-      </footer>
+            </div>
+          </div>
+        </main>
+      )}
     </div>
   )
 }
