@@ -1,5 +1,13 @@
 import { useState } from 'react'
 import './App.css'
+import badBunnyUnVerano from '../fotosAlbumsProva/Bad Bunny_Un Verano Sin Ti.png'
+import badBunnyYhlqmdlg from '../fotosAlbumsProva/Bad Bunny_YHLQMDLG.png'
+import moraEstrella from '../fotosAlbumsProva/Mora_ESTRELLA.png'
+import moraLoMismo from '../fotosAlbumsProva/Mora_LO MISMO DE SIEMPRE.png'
+import anuelEmmanuel from '../fotosAlbumsProva/Anuel AA_Emmanuel.png'
+import jcReyesVivir from '../fotosAlbumsProva/JC Reyes_VIVIR PA QUEDARSE.png'
+import quevedoBuenasNoches1 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_ 1.png'
+import quevedoBuenasNoches2 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_2.png'
 
 function App() {
   const [artist, setArtist] = useState('')
@@ -9,6 +17,63 @@ function App() {
   const [notes, setNotes] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [status, setStatus] = useState(null)
+
+  const sampleAlbums = [
+    {
+      artist: 'Bad Bunny',
+      album: 'Un Verano Sin Ti',
+      style: 'colorful',
+      cover: badBunnyUnVerano,
+    },
+    {
+      artist: 'Bad Bunny',
+      album: 'YHLQMDLG',
+      style: 'colorful',
+      cover: badBunnyYhlqmdlg,
+    },
+    {
+      artist: 'Mora',
+      album: 'ESTRELLA',
+      style: 'minimal',
+      cover: moraEstrella,
+    },
+    {
+      artist: 'Mora',
+      album: 'LO MISMO DE SIEMPRE',
+      style: 'dark',
+      cover: moraLoMismo,
+    },
+    {
+      artist: 'Anuel AA',
+      album: 'Emmanuel',
+      style: 'dark',
+      cover: anuelEmmanuel,
+    },
+    {
+      artist: 'JC Reyes',
+      album: 'VIVIR PA QUEDARSE',
+      style: 'vintage',
+      cover: jcReyesVivir,
+    },
+    {
+      artist: 'Quevedo',
+      album: 'BUENAS NOCHES (versión 1)',
+      style: 'colorful',
+      cover: quevedoBuenasNoches1,
+    },
+    {
+      artist: 'Quevedo',
+      album: 'BUENAS NOCHES (versión 2)',
+      style: 'colorful',
+      cover: quevedoBuenasNoches2,
+    },
+  ]
+
+  function handleSelectSample(sample) {
+    setArtist(sample.artist)
+    setAlbum(sample.album)
+    setStyle(sample.style ?? 'minimal')
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -96,6 +161,39 @@ function App() {
           <div className="hero-highlight">
             <p className="hero-badge">Formato A4 listo para marco</p>
             <p className="hero-price">Perfecto para regalos musicales</p>
+          </div>
+        </section>
+
+        <section className="gallery-section">
+          <div className="section-header">
+            <h3>Algunos ejemplos de cuadros</h3>
+            <p>
+              Haz clic en cualquiera de estos álbumes para rellenar el formulario con sus
+              datos y ver cómo quedaría tu cuadro.
+            </p>
+          </div>
+
+          <div className="album-grid">
+            {sampleAlbums.map((sample) => (
+              <button
+                key={`${sample.artist}-${sample.album}`}
+                type="button"
+                className="album-card"
+                onClick={() => handleSelectSample(sample)}
+              >
+                <div className="album-image-wrapper">
+                  <img
+                    src={sample.cover}
+                    alt={`${sample.artist} - ${sample.album}`}
+                    className="album-image"
+                  />
+                </div>
+                <div className="album-info">
+                  <p className="album-artist">{sample.artist}</p>
+                  <p className="album-title">{sample.album}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </section>
 
