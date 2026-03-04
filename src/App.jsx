@@ -26,6 +26,82 @@ function App() {
   const [contactAddress, setContactAddress] = useState('')
   const [contactOptions, setContactOptions] = useState(null)
 
+  // Local storage properties
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [cart, setCart] = useState(() => {
+    const saved = localStorage.getItem('cart')
+    return saved ? JSON.parse(saved) : []
+  })
+
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites))
+  }, [favorites])
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart))
+  }, [cart])
+
+  function toggleFavorite(event, albumObject) {
+    event.stopPropagation()
+    // Identificamos el álbum único combinando su título y la URL de su portada, 
+    // porque en la base tienes álbumes con el mismo nombre y diseño distinto
+    const isFavorited = favorites.some((fav) => fav.album === albumObject.album && fav.cover === albumObject.cover)
+
+    if (isFavorited) {
+      setFavorites(favorites.filter(fav => !(fav.album === albumObject.album && fav.cover === albumObject.cover)))
+    } else {
+      setFavorites([...favorites, albumObject])
+    }
+  }
+
+  function addToCart(albumObject, options) {
+    // Verificamos si ya existe EXACTAMENTE la misma configuración en la cesta
+    const existingIndex = cart.findIndex(item =>
+      item.album.album === albumObject.album &&
+      item.album.cover === albumObject.cover &&
+      item.options.purchaseType === options.purchaseType &&
+      item.options.frameSize === options.frameSize &&
+      item.options.frameColor === options.frameColor
+    )
+
+    if (existingIndex !== -1) {
+      // Si ya existe, sencillamente sumamos 1 a su cantidad
+      const newCart = [...cart]
+      newCart[existingIndex].quantity = (newCart[existingIndex].quantity || 1) + 1
+      setCart(newCart)
+    } else {
+      const newItem = {
+        id: Date.now(),
+        album: albumObject,
+        options: { ...options },
+        quantity: 1
+      }
+      setCart([...cart, newItem])
+    }
+  }
+
+  function updateCartQuantity(id, change) {
+    setCart(cart.map(item => {
+      if (item.id === id) {
+        return { ...item, quantity: item.quantity + change }
+      }
+      return item
+    }).filter(item => item.quantity > 0)) // si la cantidad llega a 0 se elimina
+  }
+
+  function removeFromCart(id) {
+    setCart(cart.filter(item => item.id !== id))
+  }
+
+  function goHome() {
+    setView('list')
+    setActiveArtistFilter('todos')
+    window.history.pushState({ view: 'list' }, '')
+  }
+
   useEffect(() => {
     // Si entramos por primera vez y no hay estado en el historial, definimos el inicial
     if (!window.history.state) {
@@ -179,15 +255,37 @@ function App() {
         <div className="top-bar-center">
           ENVÍO GRATUITO A PARTIR DE 59 € · ENTREGA EN 3–5 DÍAS LABORABLES
         </div>
-        <div className="top-bar-right">
-          <button type="button" className="top-bar-button">
-            Ir a la caja
+        <div className="top-bar-right" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="top-bar-button"
+            onClick={() => {
+              setView('favorites')
+              window.history.pushState({ view: 'favorites' }, '')
+            }}
+          >
+            🤍 Favoritos ({favorites.length})
+          </button>
+          <button
+            type="button"
+            className="top-bar-button"
+            onClick={() => {
+              setView('cart')
+              window.history.pushState({ view: 'cart' }, '')
+            }}
+          >
+            🛒 Cesta ({cart.length})
           </button>
         </div>
       </div>
 
       <header className="header header-main">
-        <div className="logo">
+        <div
+          className="logo"
+          onClick={goHome}
+          style={{ cursor: 'pointer' }}
+          title="Volver al inicio"
+        >
           <span className="logo-primary">SONORA</span>
           <span className="logo-secondary">Studio</span>
         </div>
@@ -247,7 +345,15 @@ function App() {
                       type="button"
                       className="album-card"
                       onClick={() => handleSelectSample(sample)}
+                      style={{ position: 'relative' }}
                     >
+                      <button
+                        type="button"
+                        onClick={(e) => toggleFavorite(e, sample)}
+                        style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                      >
+                        {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? '❤️' : '🤍'}
+                      </button>
                       <div className="album-image-wrapper">
                         <img
                           src={sample.cover}
@@ -284,7 +390,15 @@ function App() {
                     type="button"
                     className="album-card"
                     onClick={() => handleSelectSample(sample)}
+                    style={{ position: 'relative' }}
                   >
+                    <button
+                      type="button"
+                      onClick={(e) => toggleFavorite(e, sample)}
+                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                    >
+                      {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? '❤️' : '🤍'}
+                    </button>
                     <div className="album-image-wrapper">
                       <img
                         src={sample.cover}
@@ -381,19 +495,169 @@ function App() {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  className="primary-button product-buy-button"
-                  onClick={() =>
-                    openCheckoutPage(activeAlbum, { frameSize, frameColor, purchaseType })
-                  }
-                >
-                  Comprar
-                </button>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button
+                    type="button"
+                    className="primary-button product-buy-button"
+                    style={{ flex: 1 }}
+                    onClick={() =>
+                      openCheckoutPage(activeAlbum, { frameSize, frameColor, purchaseType })
+                    }
+                  >
+                    Comprar ahora
+                  </button>
+                  {(() => {
+                    const itemInCart = cart.find(item =>
+                      item.album.album === activeAlbum.album &&
+                      item.album.cover === activeAlbum.cover &&
+                      item.options.purchaseType === purchaseType &&
+                      item.options.frameSize === frameSize &&
+                      item.options.frameColor === frameColor
+                    )
+
+                    return itemInCart ? (
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', padding: '0.8rem 1.5rem', borderRadius: '2rem', border: '1px solid #000', backgroundColor: 'transparent' }}>
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(itemInCart.id, -1)}
+                          style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #ddd', cursor: 'pointer', borderRadius: '50%', fontWeight: 'bold' }}
+                        >
+                          -
+                        </button>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{itemInCart.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(itemInCart.id, 1)}
+                          style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #ddd', cursor: 'pointer', borderRadius: '50%', fontWeight: 'bold' }}
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        style={{ flex: 1, padding: '0.8rem 1.5rem', borderRadius: '2rem', border: '1px solid #000', backgroundColor: 'transparent', cursor: 'pointer', fontWeight: 'bold' }}
+                        onClick={() => addToCart(activeAlbum, { frameSize, frameColor, purchaseType })}
+                      >
+                        Añadir a la cesta
+                      </button>
+                    )
+                  })()}
+                </div>
                 <p className="product-helper">
                   Completarás los datos de {purchaseType === 'physical' ? 'envío' : 'entrega'} en el siguiente paso.
                 </p>
               </div>
+            </div>
+          </main>
+        )}
+
+        {view === 'favorites' && (
+          <main className="product-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <div className="section-header" style={{ padding: '2rem 2rem 0' }}>
+              <h3>Tus Favoritos</h3>
+              <p>Aquellos cuadros que más te han llamado la atención.</p>
+            </div>
+            {favorites.length > 0 ? (
+              <div className="album-grid" style={{ padding: '0 2rem 2rem' }}>
+                {favorites.map((sample, index) => (
+                  <button
+                    key={`fav-${sample.artist}-${sample.album}-${index}`}
+                    type="button"
+                    className="album-card"
+                    onClick={() => handleSelectSample(sample)}
+                    style={{ position: 'relative' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => toggleFavorite(e, sample)}
+                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                    >
+                      ❤️
+                    </button>
+                    <div className="album-image-wrapper">
+                      <img
+                        src={sample.cover}
+                        alt={`${sample.artist} - ${sample.album}`}
+                        className="album-image"
+                      />
+                    </div>
+                    <div className="album-info">
+                      <p className="album-artist">{sample.artist}</p>
+                      <p className="album-title">{sample.album}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: '#6b7280', fontSize: '0.95rem', padding: '0 2rem' }}>
+                Aún no tienes álbumes guardados en favoritos.
+              </p>
+            )}
+          </main>
+        )}
+
+        {view === 'cart' && (
+          <main className="product-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <div className="product-info" style={{ margin: '0 auto', maxWidth: '600px', width: '100%', paddingTop: '2rem' }}>
+              <h2 className="product-title">Tu Cesta</h2>
+              {cart.length > 0 ? (
+                <div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+                    {cart.map((item) => (
+                      <div key={item.id} style={{ display: 'flex', border: '1px solid #eee', borderRadius: '8px', padding: '1rem', position: 'relative' }}>
+                        <img src={item.album.cover} alt="album" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', marginRight: '1rem' }} />
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: '0 0 0.25rem 0' }}>{item.album.album}</h4>
+                          <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{item.album.artist}</p>
+                          <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem' }}>
+                            {item.options.purchaseType === 'physical' ? `Físico: ${item.options.frameSize} / ${item.options.frameColor}` : 'Digital (JPG)'}
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                          <p style={{ margin: 0, fontWeight: 'bold' }}>{item.options.purchaseType === 'physical' ? '24,90 €' : '2,00 €'} x {item.quantity}</p>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                            <button
+                              onClick={() => updateCartQuantity(item.id, -1)}
+                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #ddd', cursor: 'pointer', borderRadius: '4px' }}
+                            >
+                              -
+                            </button>
+                            <span>{item.quantity}</span>
+                            <button
+                              onClick={() => updateCartQuantity(item.id, 1)}
+                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #ddd', cursor: 'pointer', borderRadius: '4px' }}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="primary-button product-buy-button"
+                    style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem' }}
+                    onClick={advanceToPayment}
+                  >
+                    Proceder al Pago
+                  </button>
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+                  Tu cesta está vacía ahora mismo.
+                </p>
+              )}
             </div>
           </main>
         )}
@@ -573,7 +837,7 @@ function App() {
           </main>
         )}
 
-        {view !== 'contact' && view !== 'checkout' && view !== 'payment' && view !== 'success' && (
+        {view !== 'contact' && view !== 'checkout' && view !== 'payment' && view !== 'success' && view !== 'cart' && view !== 'favorites' && (
           <button
             type="button"
             className="floating-cta"
