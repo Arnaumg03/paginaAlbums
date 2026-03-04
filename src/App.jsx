@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import badBunnyUnVerano from '../fotosAlbumsProva/Bad Bunny_Un Verano Sin Ti.png'
 import badBunnyYhlqmdlg from '../fotosAlbumsProva/Bad Bunny_YHLQMDLG.png'
@@ -18,6 +18,28 @@ function App() {
   const [frameSize, setFrameSize] = useState('30x40')
   const [frameColor, setFrameColor] = useState('negro')
   const [activeArtistFilter, setActiveArtistFilter] = useState('todos')
+
+  const [contactArtist, setContactArtist] = useState('')
+  const [contactAlbum, setContactAlbum] = useState('')
+  const [contactOptions, setContactOptions] = useState(null)
+
+  useEffect(() => {
+    // Si entramos por primera vez y no hay estado en el historial, definimos el inicial
+    if (!window.history.state) {
+      window.history.replaceState({ view: 'list' }, '')
+    }
+
+    const handlePopState = (event) => {
+      if (event.state && event.state.view) {
+        setView(event.state.view)
+      } else {
+        setView('list')
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   const sampleAlbums = [
     {
@@ -99,26 +121,32 @@ function App() {
   function handleSelectSample(sample) {
     setActiveAlbum(sample)
     setView('detail')
+    window.history.pushState({ view: 'detail' }, '')
   }
 
   function handleBackToList() {
-    setView('list')
-    setActiveAlbum(null)
+    window.history.back()
   }
 
-  function handleContact(sample, options) {
+  function openContactPage(sample, options) {
+    setContactArtist(sample ? sample.artist : '')
+    setContactAlbum(sample ? sample.album : '')
+    setContactOptions(options)
+    setView('contact')
+    window.history.pushState({ view: 'contact' }, '')
+  }
+
+  function submitContactRequest() {
     const subject = encodeURIComponent('Pedido cuadro personalizado de álbum')
     const bodyLines = [
       'Hola, quiero un cuadro personalizado.',
       '',
-      sample ? `Ejemplo que me gusta: ${sample.artist} - ${sample.album}` : '',
+      contactOptions ? `Tamaño de marco: ${contactOptions.frameSize}` : '',
+      contactOptions ? `Color de marco: ${contactOptions.frameColor}` : '',
       '',
-      options ? `Tamaño de marco: ${options.frameSize}` : '',
-      options ? `Color de marco: ${options.frameColor}` : '',
-      '',
-      'Artista deseado:',
-      'Álbum deseado:',
-    ].join('\n')
+      `Artista deseado: ${contactArtist}`,
+      `Álbum deseado: ${contactAlbum}`,
+    ].filter(Boolean).join('\n')
 
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${encodeURIComponent(
       bodyLines,
@@ -186,17 +214,54 @@ function App() {
         {view === 'list' && (
           <main>
 
-          {newAlbums.length > 0 && (
             <section className="new-section">
               <div className="section-header">
                 <h3>Novedades</h3>
                 <p>Algunos de los últimos cuadros añadidos a la colección.</p>
               </div>
 
+              {newAlbums.length > 0 ? (
+                <div className="album-grid">
+                  {newAlbums.map((sample) => (
+                    <button
+                      key={`new-${sample.artist}-${sample.album}-${sample.cover}`}
+                      type="button"
+                      className="album-card"
+                      onClick={() => handleSelectSample(sample)}
+                    >
+                      <div className="album-image-wrapper">
+                        <img
+                          src={sample.cover}
+                          alt={`${sample.artist} - ${sample.album}`}
+                          className="album-image"
+                        />
+                        {sample.isNew && <span className="album-tag">Nuevo</span>}
+                      </div>
+                      <div className="album-info">
+                        <p className="album-artist">{sample.artist}</p>
+                        <p className="album-title">{sample.album}</p>
+                        <p className="album-price">Desde 24,90 €</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+                  No hay novedades por el momento.
+                </p>
+              )}
+            </section>
+
+            <section className="all-section">
+              <div className="section-header">
+                <h3>Todos los cuadros</h3>
+                <p>Explora toda la colección disponible ahora mismo.</p>
+              </div>
+
               <div className="album-grid">
-                {newAlbums.map((sample) => (
+                {allAlbums.map((sample) => (
                   <button
-                    key={`new-${sample.artist}-${sample.album}-${sample.cover}`}
+                    key={`${sample.artist}-${sample.album}-${sample.cover}`}
                     type="button"
                     className="album-card"
                     onClick={() => handleSelectSample(sample)}
@@ -218,40 +283,7 @@ function App() {
                 ))}
               </div>
             </section>
-          )}
-
-          <section className="all-section">
-            <div className="section-header">
-              <h3>Todos los cuadros</h3>
-              <p>Explora toda la colección disponible ahora mismo.</p>
-            </div>
-
-            <div className="album-grid">
-              {allAlbums.map((sample) => (
-                <button
-                  key={`${sample.artist}-${sample.album}-${sample.cover}`}
-                  type="button"
-                  className="album-card"
-                  onClick={() => handleSelectSample(sample)}
-                >
-                  <div className="album-image-wrapper">
-                    <img
-                      src={sample.cover}
-                      alt={`${sample.artist} - ${sample.album}`}
-                      className="album-image"
-                    />
-                    {sample.isNew && <span className="album-tag">Nuevo</span>}
-                  </div>
-                  <div className="album-info">
-                    <p className="album-artist">{sample.artist}</p>
-                    <p className="album-title">{sample.album}</p>
-                    <p className="album-price">Desde 24,90 €</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        </main>
+          </main>
         )}
 
         {view === 'detail' && activeAlbum && (
@@ -313,27 +345,75 @@ function App() {
                   type="button"
                   className="primary-button product-buy-button"
                   onClick={() =>
-                    handleContact(activeAlbum, { frameSize, frameColor })
+                    openContactPage(activeAlbum, { frameSize, frameColor })
                   }
                 >
-                  Continuar al pago por email
+                  Continuar a solicitud
                 </button>
                 <p className="product-helper">
-                  Te responderé con los pasos de pago y los detalles de envío según tus
-                  preferencias.
+                  Te pediré confirmar el artista y álbum en la siguiente pantalla.
                 </p>
               </div>
             </div>
           </main>
         )}
 
-        <button
-          type="button"
-          className="floating-cta"
-          onClick={() => handleContact(null)}
-        >
-          Pedir cuadro personalizado
-        </button>
+        {view === 'contact' && (
+          <main className="product-page">
+            <button type="button" className="back-link" onClick={() => window.history.back()}>
+              ← Volver
+            </button>
+            <div className="product-info" style={{ margin: '0 auto', maxWidth: '500px', width: '100%', paddingTop: '2rem' }}>
+              <h2 className="product-title">Solicitar cuadro personalizado</h2>
+              <p className="product-subtitle" style={{ marginBottom: '2rem' }}>
+                Indica el artista y álbum que buscas. Te abriremos un email automático con tus datos listos para enviarnos.
+              </p>
+
+              <div className="product-options">
+                <label className="field">
+                  <span>Nombre del artista</span>
+                  <input
+                    type="text"
+                    placeholder="Ej. Rosalía"
+                    value={contactArtist}
+                    onChange={(e) => setContactArtist(e.target.value)}
+                    style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  />
+                </label>
+
+                <label className="field">
+                  <span>Nombre del álbum</span>
+                  <input
+                    type="text"
+                    placeholder="Ej. MOTOMAMI"
+                    value={contactAlbum}
+                    onChange={(e) => setContactAlbum(e.target.value)}
+                    style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  />
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="primary-button product-buy-button"
+                style={{ marginTop: '2rem' }}
+                onClick={submitContactRequest}
+              >
+                Solicitar por email
+              </button>
+            </div>
+          </main>
+        )}
+
+        {view !== 'contact' && (
+          <button
+            type="button"
+            className="floating-cta"
+            onClick={() => openContactPage(null)}
+          >
+            ¿No encuentras tu cuadro?
+          </button>
+        )}
       </div>
     </>
   )

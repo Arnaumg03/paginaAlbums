@@ -191,7 +191,7 @@ main {
   font-size: 0.95rem;
 }
 
-.hero-list li + li {
+.hero-list li+li {
   margin-top: 0.35rem;
 }
 
@@ -296,7 +296,7 @@ main {
 
 .album-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -753,7 +753,7 @@ textarea {
   }
 }
 
-.steps-list li + li {
+.steps-list li+li {
   margin-top: 0.35rem;
 }
 
