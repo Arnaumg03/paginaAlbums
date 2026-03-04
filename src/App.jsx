@@ -18,9 +18,12 @@ function App() {
   const [frameSize, setFrameSize] = useState('30x40')
   const [frameColor, setFrameColor] = useState('negro')
   const [activeArtistFilter, setActiveArtistFilter] = useState('todos')
+  const [purchaseType, setPurchaseType] = useState('physical')
 
   const [contactArtist, setContactArtist] = useState('')
   const [contactAlbum, setContactAlbum] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactAddress, setContactAddress] = useState('')
   const [contactOptions, setContactOptions] = useState(null)
 
   useEffect(() => {
@@ -128,21 +131,37 @@ function App() {
     window.history.back()
   }
 
-  function openContactPage(sample, options) {
-    setContactArtist(sample ? sample.artist : '')
-    setContactAlbum(sample ? sample.album : '')
-    setContactOptions(options)
+  function openContactPage() {
+    setContactArtist('')
+    setContactAlbum('')
     setView('contact')
     window.history.pushState({ view: 'contact' }, '')
   }
 
+  function openCheckoutPage(sample, options) {
+    setContactArtist(sample.artist)
+    setContactAlbum(sample.album)
+    setContactOptions(options)
+    setContactEmail('')
+    setContactAddress('')
+    setView('checkout')
+    window.history.pushState({ view: 'checkout' }, '')
+  }
+
+  function advanceToPayment() {
+    setView('payment')
+    window.history.pushState({ view: 'payment' }, '')
+  }
+
+  function simulateFakePayment() {
+    setView('success')
+    window.history.pushState({ view: 'success' }, '')
+  }
+
   function submitContactRequest() {
-    const subject = encodeURIComponent('Pedido cuadro personalizado de álbum')
+    const subject = encodeURIComponent('Solicitud de nuevo cuadro personalizado')
     const bodyLines = [
-      'Hola, quiero un cuadro personalizado.',
-      '',
-      contactOptions ? `Tamaño de marco: ${contactOptions.frameSize}` : '',
-      contactOptions ? `Color de marco: ${contactOptions.frameColor}` : '',
+      'Hola, no he encontrado el cuadro que busco en la web.',
       '',
       `Artista deseado: ${contactArtist}`,
       `Álbum deseado: ${contactAlbum}`,
@@ -311,50 +330,199 @@ function App() {
               <div className="product-info">
                 <p className="product-artist">{activeAlbum.artist}</p>
                 <h2 className="product-title">{activeAlbum.album}</h2>
-                <p className="product-subtitle">Lámina A4 + marco personalizado</p>
-                <p className="product-price">Desde 24,90 €</p>
+                <p className="product-subtitle">
+                  {purchaseType === 'physical'
+                    ? 'Lámina impresa + marco personalizado'
+                    : 'Documento digital (JPG) de alta calidad'}
+                </p>
+                <p className="product-price">
+                  {purchaseType === 'physical' ? 'Desde 24,90 €' : 'Por solo 2 €'}
+                </p>
 
-                <div className="product-options">
-                  <label className="field">
-                    <span>Tamaño del marco</span>
+                <div className="product-options" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <label className="field" style={{ marginBottom: '0.5rem' }}>
+                    <span>Formato de compra</span>
                     <select
-                      value={frameSize}
-                      onChange={(event) => setFrameSize(event.target.value)}
+                      value={purchaseType}
+                      onChange={(event) => setPurchaseType(event.target.value)}
                     >
-                      <option value="21x30">21 x 30 cm (A4)</option>
-                      <option value="30x40">30 x 40 cm</option>
-                      <option value="40x50">40 x 50 cm</option>
+                      <option value="physical">Cuadro con marco (Físico)</option>
+                      <option value="digital">Solo documento digital (JPG)</option>
                     </select>
                   </label>
 
-                  <label className="field">
-                    <span>Color del marco</span>
-                    <select
-                      value={frameColor}
-                      onChange={(event) => setFrameColor(event.target.value)}
-                    >
-                      <option value="negro">Negro</option>
-                      <option value="blanco">Blanco</option>
-                      <option value="madera-clara">Madera clara</option>
-                      <option value="madera-oscura">Madera oscura</option>
-                    </select>
-                  </label>
+                  {purchaseType === 'physical' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+                      <label className="field">
+                        <span>Tamaño del marco</span>
+                        <select
+                          value={frameSize}
+                          onChange={(event) => setFrameSize(event.target.value)}
+                        >
+                          <option value="21x30">21 x 30 cm (A4)</option>
+                          <option value="30x40">30 x 40 cm</option>
+                          <option value="40x50">40 x 50 cm</option>
+                        </select>
+                      </label>
+
+                      <label className="field">
+                        <span>Color del marco</span>
+                        <select
+                          value={frameColor}
+                          onChange={(event) => setFrameColor(event.target.value)}
+                        >
+                          <option value="negro">Negro</option>
+                          <option value="blanco">Blanco</option>
+                          <option value="madera-clara">Madera clara</option>
+                          <option value="madera-oscura">Madera oscura</option>
+                        </select>
+                      </label>
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="button"
                   className="primary-button product-buy-button"
                   onClick={() =>
-                    openContactPage(activeAlbum, { frameSize, frameColor })
+                    openCheckoutPage(activeAlbum, { frameSize, frameColor, purchaseType })
                   }
                 >
-                  Continuar a solicitud
+                  Comprar
                 </button>
                 <p className="product-helper">
-                  Te pediré confirmar el artista y álbum en la siguiente pantalla.
+                  Completarás los datos de {purchaseType === 'physical' ? 'envío' : 'entrega'} en el siguiente paso.
                 </p>
               </div>
             </div>
+          </main>
+        )}
+
+        {view === 'checkout' && (
+          <main className="product-page">
+            <button type="button" className="back-link" onClick={() => window.history.back()}>
+              ← Volver
+            </button>
+            <div className="product-info" style={{ margin: '0 auto', maxWidth: '500px', width: '100%', paddingTop: '2rem' }}>
+              <h2 className="product-title">Completar pedido</h2>
+              <p className="product-subtitle" style={{ marginBottom: '2rem' }}>
+                Estás comprando: <strong>{contactArtist} - {contactAlbum}</strong>
+              </p>
+
+              <div className="product-options">
+                {contactOptions && contactOptions.purchaseType === 'digital' && (
+                  <label className="field" style={{ gridColumn: '1 / -1' }}>
+                    <span>Email de entrega</span>
+                    <input
+                      type="email"
+                      placeholder="Tu correo electrónico para recibir el JPG..."
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                    />
+                  </label>
+                )}
+
+                {(!contactOptions || contactOptions.purchaseType === 'physical') && (
+                  <label className="field" style={{ gridColumn: '1 / -1' }}>
+                    <span>Dirección de envío completa</span>
+                    <input
+                      type="text"
+                      placeholder="Calle, Número, Piso, Código Postal, Ciudad..."
+                      value={contactAddress}
+                      onChange={(e) => setContactAddress(e.target.value)}
+                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                    />
+                  </label>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="primary-button product-buy-button"
+                style={{ marginTop: '2rem', width: '100%', fontSize: '1.1rem', padding: '0.8rem' }}
+                onClick={advanceToPayment}
+              >
+                Continuar al Pago
+              </button>
+            </div>
+          </main>
+        )}
+
+        {view === 'payment' && (
+          <main className="product-page">
+            <button type="button" className="back-link" onClick={() => window.history.back()}>
+              ← Volver
+            </button>
+            <div className="product-info" style={{ margin: '0 auto', maxWidth: '500px', width: '100%', paddingTop: '2rem' }}>
+              <h2 className="product-title">Pasarela de Pago Segura</h2>
+              <p className="product-subtitle" style={{ marginBottom: '2rem' }}>
+                Total a pagar: <strong>{contactOptions?.purchaseType === 'physical' ? '24,90 €' : '2,00 €'}</strong>
+              </p>
+
+              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
+                <label className="field" style={{ marginBottom: '1rem' }}>
+                  <span>Número de tarjeta</span>
+                  <input
+                    type="text"
+                    placeholder="0000 0000 0000 0000"
+                    style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'monospace' }}
+                  />
+                </label>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <label className="field">
+                    <span>Caducidad</span>
+                    <input
+                      type="text"
+                      placeholder="MM/AA"
+                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </label>
+                  <label className="field">
+                    <span>CVC</span>
+                    <input
+                      type="text"
+                      placeholder="123"
+                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: '#fefce8', padding: '1rem', borderRadius: '8px', border: '1px solid #fef08a', color: '#854d0e', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+                Simulación de entorno de pruebas. Ningún cargo real se realizará.
+              </div>
+
+              <button
+                type="button"
+                className="primary-button product-buy-button"
+                style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem', backgroundColor: '#10b981', color: 'white', border: 'none' }}
+                onClick={simulateFakePayment}
+              >
+                Pagar {contactOptions?.purchaseType === 'physical' ? '24,90 €' : '2,00 €'}
+              </button>
+            </div>
+          </main>
+        )}
+
+        {view === 'success' && (
+          <main className="product-page" style={{ textAlign: 'center', paddingTop: '4rem' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
+            <h2 className="product-title" style={{ fontSize: '2rem', marginBottom: '1rem', color: '#10b981' }}>¡Pago realizado con éxito!</h2>
+            <p className="product-subtitle" style={{ maxWidth: '400px', margin: '0 auto 2rem' }}>
+              Tu pedido de <strong>{contactArtist} - {contactAlbum}</strong> está confirmado.
+              {contactOptions && contactOptions.purchaseType === 'physical'
+                ? ' Nos pondremos en contacto contigo pronto con el número de seguimiento.'
+                : ' Te enviaremos el documento JPG al correo proporcionado en breve.'}
+            </p>
+            <button
+              type="button"
+              className="primary-button product-buy-button"
+              onClick={handleBackToList}
+            >
+              Volver al inicio
+            </button>
           </main>
         )}
 
@@ -364,9 +532,9 @@ function App() {
               ← Volver
             </button>
             <div className="product-info" style={{ margin: '0 auto', maxWidth: '500px', width: '100%', paddingTop: '2rem' }}>
-              <h2 className="product-title">Solicitar cuadro personalizado</h2>
+              <h2 className="product-title">¿No encuentras tu cuadro?</h2>
               <p className="product-subtitle" style={{ marginBottom: '2rem' }}>
-                Indica el artista y álbum que buscas. Te abriremos un email automático con tus datos listos para enviarnos.
+                Dinos el artista y álbum que buscas y lo diseñamos para ti.
               </p>
 
               <div className="product-options">
@@ -396,7 +564,7 @@ function App() {
               <button
                 type="button"
                 className="primary-button product-buy-button"
-                style={{ marginTop: '2rem' }}
+                style={{ marginTop: '2rem', width: '100%' }}
                 onClick={submitContactRequest}
               >
                 Solicitar por email
@@ -405,11 +573,11 @@ function App() {
           </main>
         )}
 
-        {view !== 'contact' && (
+        {view !== 'contact' && view !== 'checkout' && view !== 'payment' && view !== 'success' && (
           <button
             type="button"
             className="floating-cta"
-            onClick={() => openContactPage(null)}
+            onClick={openContactPage}
           >
             ¿No encuentras tu cuadro?
           </button>
@@ -418,5 +586,4 @@ function App() {
     </>
   )
 }
-
 export default App
