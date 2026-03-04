@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import badBunnyUnVerano from '../fotosAlbumsProva/Bad Bunny_Un Verano Sin Ti.png'
 import badBunnyYhlqmdlg from '../fotosAlbumsProva/Bad Bunny_YHLQMDLG.png'
@@ -35,6 +35,7 @@ function App() {
     const saved = localStorage.getItem('cart')
     return saved ? JSON.parse(saved) : []
   })
+  const idCounter = useRef(0)
 
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites))
@@ -46,7 +47,7 @@ function App() {
 
   function toggleFavorite(event, albumObject) {
     event.stopPropagation()
-    // Identificamos el álbum único combinando su título y la URL de su portada, 
+    // Identificamos el álbum único combinando su título y la URL de su portada,
     // porque en la base tienes álbumes con el mismo nombre y diseño distinto
     const isFavorited = favorites.some((fav) => fav.album === albumObject.album && fav.cover === albumObject.cover)
 
@@ -74,7 +75,7 @@ function App() {
       setCart(newCart)
     } else {
       const newItem = {
-        id: Date.now(),
+        id: ++idCounter.current,
         album: albumObject,
         options: { ...options },
         quantity: 1
@@ -90,10 +91,6 @@ function App() {
       }
       return item
     }).filter(item => item.quantity > 0)) // si la cantidad llega a 0 se elimina
-  }
-
-  function removeFromCart(id) {
-    setCart(cart.filter(item => item.id !== id))
   }
 
   function goHome() {
@@ -203,7 +200,7 @@ function App() {
       : sampleAlbums.filter((album) => album.artist === activeArtistFilter)
 
   const newAlbums = filteredAlbums.filter((album) => album.isNew)
-  const allAlbums = filteredAlbums
+  // usamos directamente `filteredAlbums` donde haga falta para evitar una variable redundante
 
   function handleSelectSample(sample) {
     setActiveAlbum(sample)
@@ -318,7 +315,7 @@ function App() {
           style={{ cursor: 'pointer' }}
           title="Volver al inicio"
         >
-          <span className="logo-primary">SONORA</span>
+          <span className="logo-primary">FRAME SOUND</span>
           <span className="logo-secondary">Studio</span>
         </div>
         <nav className="main-nav">
@@ -384,7 +381,15 @@ function App() {
                         onClick={(e) => toggleFavorite(e, sample)}
                         style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
                       >
-                        {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? '❤️' : '🤍'}
+                        {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                          </svg>
+                        )}
                       </button>
                       <div className="album-image-wrapper">
                         <img
@@ -416,7 +421,7 @@ function App() {
               </div>
 
               <div className="album-grid">
-                {allAlbums.map((sample) => (
+                {filteredAlbums.map((sample) => (
                   <button
                     key={`${sample.artist}-${sample.album}-${sample.cover}`}
                     type="button"
@@ -429,7 +434,15 @@ function App() {
                       onClick={(e) => toggleFavorite(e, sample)}
                       style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
                     >
-                      {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? '❤️' : '🤍'}
+                      {favorites.some(fav => fav.album === sample.album && fav.cover === sample.cover) ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                      )}
                     </button>
                     <div className="album-image-wrapper">
                       <img
@@ -609,7 +622,9 @@ function App() {
                       onClick={(e) => toggleFavorite(e, sample)}
                       style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
                     >
-                      ❤️
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                      </svg>
                     </button>
                     <div className="album-image-wrapper">
                       <img
@@ -876,17 +891,17 @@ function App() {
             </button>
             <h2 className="legal-title">Información de contacto</h2>
             <div className="legal-content">
-              <p><strong>Información de Contacto de SONORA Studio:</strong></p>
+              <p><strong>Información de Contacto de FRAME SOUND Studio:</strong></p>
               <ul>
-                <li><strong>Correo electrónico de atención al cliente:</strong> <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a></li>
-                <li><strong>Instagram:</strong> <a href="https://instagram.com/sonorastudio" target="_blank" rel="noreferrer">@sonorastudio</a></li>
-                <li><strong>TikTok:</strong> <a href="https://tiktok.com/@sonorastudio" target="_blank" rel="noreferrer">@sonorastudio</a></li>
+                <li><strong>Correo electrónico de atención al cliente:</strong> <a href="mailto:contacto@framesound.com">contacto@framesound.com</a></li>
+                <li><strong>Instagram:</strong> <a href="https://instagram.com/framesound" target="_blank" rel="noreferrer">@framesound</a></li>
+                <li><strong>TikTok:</strong> <a href="https://tiktok.com/@framesound" target="_blank" rel="noreferrer">@framesound</a></li>
                 <li><strong>Horario de atención al cliente:</strong> 24h todos los días</li>
               </ul>
               <p>Puedes comunicarte con nosotros a través de cualquiera de los medios mencionados anteriormente para realizar consultas, plantear inquietudes, solicitar asistencia o proporcionar comentarios relacionados con nuestros productos, servicios o políticas.</p>
               <p><strong>Recuerda que si nos posteas en cualquier red social mencionándonos con tu diseño obtendrás un 10% de descuento en tu siguiente compra.</strong></p>
               <p>Estamos aquí para ayudarte y nos esforzamos por brindarte una atención al cliente excepcional.</p>
-              <p>¡Gracias por elegir SONORA Studio!</p>
+              <p>¡Gracias por elegir FRAME SOUND Studio!</p>
               <p style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#6b7280' }}>Fecha de entrada en vigor: 21/12/2024</p>
             </div>
           </main>
@@ -901,7 +916,7 @@ function App() {
             <div className="legal-content">
               <p>Al tratarse de productos 100% personalizados y diseñados a medida, <strong>no aceptamos devoluciones ni ofrecemos reembolsos</strong> por arrepentimiento tras el inicio de la producción del diseño.</p>
               <h3>Desperfectos y Roturas de Envío</h3>
-              <p>Si tu pedido llega dañado, ya sea el marco roto o el cristal/metacrilato dañado debido al transporte, ponte en contacto con nosotros en las primeras 48h desde la recepción a través de nuestro correo <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a> adjuntando fotografías legibles del producto dañado y de la caja de transporte.</p>
+              <p>Si tu pedido llega dañado, ya sea el marco roto o el cristal/metacrilato dañado debido al transporte, ponte en contacto con nosotros en las primeras 48h desde la recepción a través de nuestro correo <a href="mailto:contacto@framesound.com">contacto@framesound.com</a> adjuntando fotografías legibles del producto dañado y de la caja de transporte.</p>
               <p>Analizaremos tu caso y, si procede, tramitaremos la reposición del material afectado de manera inmediata y sin coste para ti.</p>
             </div>
           </main>
@@ -914,9 +929,9 @@ function App() {
             </button>
             <h2 className="legal-title">Política de privacidad</h2>
             <div className="legal-content">
-              <p>En SONORA Studio respetamos la privacidad de tus datos. La información personal o de envío que se solicite será empleada exclusivamente para tramitar tus pedidos y la logística de correos, o responder a tus consultas de información.</p>
+              <p>En FRAME SOUND Studio respetamos la privacidad de tus datos. La información personal o de envío que se solicite será empleada exclusivamente para tramitar tus pedidos y la logística de correos, o responder a tus consultas de información.</p>
               <p>No venderemos ni cederemos tus datos a nivel comercial hacia terceros. Conservaremos la información el tiempo meramente necesario o que requiera la fiscalidad.</p>
-              <p>Para ejercitar derechos de rectificación, cancelación, u oposición según la normativa vigente (RGPD), contacta a <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a> indicando en el asunto correspondiente la palabra PRIVACIDAD.</p>
+              <p>Para ejercitar derechos de rectificación, cancelación, u oposición según la normativa vigente (RGPD), contacta a <a href="mailto:contacto@framesound.com">contacto@framesound.com</a> indicando en el asunto correspondiente la palabra PRIVACIDAD.</p>
             </div>
           </main>
         )}
@@ -929,7 +944,7 @@ function App() {
             <h2 className="legal-title">Términos del servicio</h2>
             <div className="legal-content">
               <p>El uso de este portal expone la aceptación de unas condiciones básicas de compra. Todos los cuadros se diseñan imitando el estilo visual de interfaces multimedia pero adaptándolos a cada petición o cantante.</p>
-              <p>SONORA Studio no es propietaria de logos externos, las portadas y diseños subidos parten del "Fair Use" como piezas artísticas, tributo y montaje de admiración a artistas. No representamos a disqueras ni a entidades externas mencionadas en las descripciones o muestras; si un diseño vulnera explícitamente derechos, disponemos de canales de aviso para su descarte y revisión.</p>
+              <p>FRAME SOUND Studio no es propietaria de logos externos, las portadas y diseños subidos parten del "Fair Use" como piezas artísticas, tributo y montaje de admiración a artistas. No representamos a disqueras ni a entidades externas mencionadas en las descripciones o muestras; si un diseño vulnera explícitamente derechos, disponemos de canales de aviso para su descarte y revisión.</p>
             </div>
           </main>
         )}
@@ -956,7 +971,7 @@ function App() {
             </button>
             <h2 className="legal-title">Aviso legal</h2>
             <div className="legal-content">
-              <p>El portal operado bajo la denominación comercial SONORA Studio tiene por objeto la creación e intermediación de arte a medida personalizado en base a peticiones cursadas por visitantes.</p>
+              <p>El portal operado bajo la denominación comercial FRAME SOUND Studio tiene por objeto la creación e intermediación de arte a medida personalizado en base a peticiones cursadas por visitantes.</p>
               <p>La web y sus elementos visuales están bajo la responsabilidad de este organismo artístico. Las fotografías exhibidas de "muestras" son composiciones previas para que los usuarios comprendan cómo queda la estética del formato cuadro que recibirán.</p>
             </div>
           </main>
@@ -975,10 +990,10 @@ function App() {
 
       <footer className="site-footer">
         <div className="footer-socials">
-          <a href="https://instagram.com/sonorastudio" target="_blank" rel="noreferrer" className="footer-social-link" title="Instagram">
+          <a href="https://instagram.com/framesoundstudio" target="_blank" rel="noreferrer" className="footer-social-link" title="Instagram">
             Instagram
           </a>
-          <a href="https://tiktok.com/@sonorastudio" target="_blank" rel="noreferrer" className="footer-social-link" title="TikTok">
+          <a href="https://tiktok.com/@framesoundstudio" target="_blank" rel="noreferrer" className="footer-social-link" title="TikTok">
             TikTok
           </a>
         </div>
@@ -993,7 +1008,7 @@ function App() {
             <li><a onClick={() => openLegalPage('legal-notice')}>Aviso legal</a></li>
           </ul>
           <p className="footer-copyright">
-            © 2026, SONORA Studio. Todos los derechos reservados.
+            © 2026, FRAME SOUND Studio. Todos los derechos reservados.
           </p>
         </div>
       </footer>

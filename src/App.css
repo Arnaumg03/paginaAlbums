@@ -8,7 +8,7 @@
 
 .top-bar {
   width: 100%;
-  padding: 0.3rem 3rem;
+  padding: 0.5rem 3rem; /* aumentado para dar más espacio vertical */
   background: #fef3c7;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.75rem;
@@ -33,6 +33,7 @@
 .top-bar-right {
   display: flex;
   justify-content: flex-end;
+  align-items: center; /* asegurar alineación vertical */
 }
 
 .top-bar-button {
