@@ -102,6 +102,14 @@ function App() {
     window.history.pushState({ view: 'list' }, '')
   }
 
+  function handleFilterSelect(artistName) {
+    setActiveArtistFilter(artistName)
+    if (view !== 'list') {
+      setView('list')
+      window.history.pushState({ view: 'list' }, '')
+    }
+  }
+
   useEffect(() => {
     // Si entramos por primera vez y no hay estado en el historial, definimos el inicial
     if (!window.history.state) {
@@ -207,6 +215,12 @@ function App() {
     window.history.back()
   }
 
+  function openLegalPage(pageId) {
+    setView(pageId)
+    window.history.pushState({ view: pageId }, '')
+    window.scrollTo(0, 0)
+  }
+
   function openContactPage() {
     setContactArtist('')
     setContactAlbum('')
@@ -255,26 +269,44 @@ function App() {
         <div className="top-bar-center">
           ENVÍO GRATUITO A PARTIR DE 59 € · ENTREGA EN 3–5 DÍAS LABORABLES
         </div>
-        <div className="top-bar-right" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="top-bar-right" style={{ display: 'flex', gap: '1.2rem', alignItems: 'center', paddingRight: '0.5rem' }}>
           <button
             type="button"
-            className="top-bar-button"
+            title="Favoritos"
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#111827', padding: '0.2rem' }}
             onClick={() => {
               setView('favorites')
               window.history.pushState({ view: 'favorites' }, '')
             }}
           >
-            🤍 Favoritos ({favorites.length})
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            {favorites.length > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-8px', background: '#ef4444', color: 'white', borderRadius: '999px', padding: '0.1rem 0.35rem', fontSize: '0.65rem', fontWeight: 'bold', minWidth: '16px', display: 'flex', justifyContent: 'center', boxShadow: '0 0 0 2px #fef3c7' }}>
+                {favorites.length}
+              </span>
+            )}
           </button>
           <button
             type="button"
-            className="top-bar-button"
+            title="Cesta"
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#111827', padding: '0.2rem' }}
             onClick={() => {
               setView('cart')
               window.history.pushState({ view: 'cart' }, '')
             }}
           >
-            🛒 Cesta ({cart.length})
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            {cart.length > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-8px', background: '#ef4444', color: 'white', borderRadius: '999px', padding: '0.1rem 0.35rem', fontSize: '0.65rem', fontWeight: 'bold', minWidth: '16px', display: 'flex', justifyContent: 'center', boxShadow: '0 0 0 2px #fef3c7' }}>
+                {cart.length}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -297,7 +329,7 @@ function App() {
                 ? 'nav-link nav-link-active'
                 : 'nav-link'
             }
-            onClick={() => setActiveArtistFilter('todos')}
+            onClick={() => handleFilterSelect('todos')}
           >
             Todos
           </button>
@@ -310,7 +342,7 @@ function App() {
                   ? 'nav-link nav-link-active'
                   : 'nav-link'
               }
-              onClick={() => setActiveArtistFilter(artist)}
+              onClick={() => handleFilterSelect(artist)}
             >
               {artist}
             </button>
@@ -837,7 +869,100 @@ function App() {
           </main>
         )}
 
-        {view !== 'contact' && view !== 'checkout' && view !== 'payment' && view !== 'success' && view !== 'cart' && view !== 'favorites' && (
+        {view === 'contact-info' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Información de contacto</h2>
+            <div className="legal-content">
+              <p><strong>Información de Contacto de SONORA Studio:</strong></p>
+              <ul>
+                <li><strong>Correo electrónico de atención al cliente:</strong> <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a></li>
+                <li><strong>Instagram:</strong> <a href="https://instagram.com/sonorastudio" target="_blank" rel="noreferrer">@sonorastudio</a></li>
+                <li><strong>TikTok:</strong> <a href="https://tiktok.com/@sonorastudio" target="_blank" rel="noreferrer">@sonorastudio</a></li>
+                <li><strong>Horario de atención al cliente:</strong> 24h todos los días</li>
+              </ul>
+              <p>Puedes comunicarte con nosotros a través de cualquiera de los medios mencionados anteriormente para realizar consultas, plantear inquietudes, solicitar asistencia o proporcionar comentarios relacionados con nuestros productos, servicios o políticas.</p>
+              <p><strong>Recuerda que si nos posteas en cualquier red social mencionándonos con tu diseño obtendrás un 10% de descuento en tu siguiente compra.</strong></p>
+              <p>Estamos aquí para ayudarte y nos esforzamos por brindarte una atención al cliente excepcional.</p>
+              <p>¡Gracias por elegir SONORA Studio!</p>
+              <p style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#6b7280' }}>Fecha de entrada en vigor: 21/12/2024</p>
+            </div>
+          </main>
+        )}
+
+        {view === 'refund-policy' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Política de reembolso</h2>
+            <div className="legal-content">
+              <p>Al tratarse de productos 100% personalizados y diseñados a medida, <strong>no aceptamos devoluciones ni ofrecemos reembolsos</strong> por arrepentimiento tras el inicio de la producción del diseño.</p>
+              <h3>Desperfectos y Roturas de Envío</h3>
+              <p>Si tu pedido llega dañado, ya sea el marco roto o el cristal/metacrilato dañado debido al transporte, ponte en contacto con nosotros en las primeras 48h desde la recepción a través de nuestro correo <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a> adjuntando fotografías legibles del producto dañado y de la caja de transporte.</p>
+              <p>Analizaremos tu caso y, si procede, tramitaremos la reposición del material afectado de manera inmediata y sin coste para ti.</p>
+            </div>
+          </main>
+        )}
+
+        {view === 'privacy-policy' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Política de privacidad</h2>
+            <div className="legal-content">
+              <p>En SONORA Studio respetamos la privacidad de tus datos. La información personal o de envío que se solicite será empleada exclusivamente para tramitar tus pedidos y la logística de correos, o responder a tus consultas de información.</p>
+              <p>No venderemos ni cederemos tus datos a nivel comercial hacia terceros. Conservaremos la información el tiempo meramente necesario o que requiera la fiscalidad.</p>
+              <p>Para ejercitar derechos de rectificación, cancelación, u oposición según la normativa vigente (RGPD), contacta a <a href="mailto:contacto@sonorastudio.com">contacto@sonorastudio.com</a> indicando en el asunto correspondiente la palabra PRIVACIDAD.</p>
+            </div>
+          </main>
+        )}
+
+        {view === 'terms-of-service' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Términos del servicio</h2>
+            <div className="legal-content">
+              <p>El uso de este portal expone la aceptación de unas condiciones básicas de compra. Todos los cuadros se diseñan imitando el estilo visual de interfaces multimedia pero adaptándolos a cada petición o cantante.</p>
+              <p>SONORA Studio no es propietaria de logos externos, las portadas y diseños subidos parten del "Fair Use" como piezas artísticas, tributo y montaje de admiración a artistas. No representamos a disqueras ni a entidades externas mencionadas en las descripciones o muestras; si un diseño vulnera explícitamente derechos, disponemos de canales de aviso para su descarte y revisión.</p>
+            </div>
+          </main>
+        )}
+
+        {view === 'shipping-policy' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Política de envío</h2>
+            <div className="legal-content">
+              <p>Realizamos envíos de lunes a viernes (excepto festivos). Desde que se confirma un encargo web y el pago (para el pedido final físico), el plazo de montaje y producción es de unas 24-48 horas laborables.</p>
+              <p>Posteriormente, el envío regular dispone de entrega exprés de 3-5 días dependiendo del servicio postal de mensajería asignado.</p>
+              <p>Si la compra ha sido de <strong>código digital (JPG)</strong>, su envío se cursa de forma virtual y directa a tu email en un máximo de 24 horas.</p>
+              <p>En época de alta demanda (ej. Navidad, Black Friday) los tiempos pueden retrasarse 1-2 días extra. Cualquier situación imprevista se te comunicará a la máxima brevedad.</p>
+            </div>
+          </main>
+        )}
+
+        {view === 'legal-notice' && (
+          <main className="legal-page">
+            <button type="button" className="back-link" onClick={handleBackToList}>
+              ← Volver
+            </button>
+            <h2 className="legal-title">Aviso legal</h2>
+            <div className="legal-content">
+              <p>El portal operado bajo la denominación comercial SONORA Studio tiene por objeto la creación e intermediación de arte a medida personalizado en base a peticiones cursadas por visitantes.</p>
+              <p>La web y sus elementos visuales están bajo la responsabilidad de este organismo artístico. Las fotografías exhibidas de "muestras" son composiciones previas para que los usuarios comprendan cómo queda la estética del formato cuadro que recibirán.</p>
+            </div>
+          </main>
+        )}
+
+        {view !== 'contact' && view !== 'checkout' && view !== 'payment' && view !== 'success' && view !== 'cart' && view !== 'favorites' && view !== 'contact-info' && view !== 'refund-policy' && view !== 'privacy-policy' && view !== 'terms-of-service' && view !== 'shipping-policy' && view !== 'legal-notice' && (
           <button
             type="button"
             className="floating-cta"
@@ -847,7 +972,33 @@ function App() {
           </button>
         )}
       </div>
+
+      <footer className="site-footer">
+        <div className="footer-socials">
+          <a href="https://instagram.com/sonorastudio" target="_blank" rel="noreferrer" className="footer-social-link" title="Instagram">
+            Instagram
+          </a>
+          <a href="https://tiktok.com/@sonorastudio" target="_blank" rel="noreferrer" className="footer-social-link" title="TikTok">
+            TikTok
+          </a>
+        </div>
+
+        <div className="footer-bottom">
+          <ul className="footer-policy-links">
+            <li><a onClick={() => openLegalPage('refund-policy')}>Política de reembolso</a></li>
+            <li><a onClick={() => openLegalPage('privacy-policy')}>Política de privacidad</a></li>
+            <li><a onClick={() => openLegalPage('terms-of-service')}>Términos del servicio</a></li>
+            <li><a onClick={() => openLegalPage('shipping-policy')}>Política de envío</a></li>
+            <li><a onClick={() => openLegalPage('contact-info')}>Información de contacto</a></li>
+            <li><a onClick={() => openLegalPage('legal-notice')}>Aviso legal</a></li>
+          </ul>
+          <p className="footer-copyright">
+            © 2026, SONORA Studio. Todos los derechos reservados.
+          </p>
+        </div>
+      </footer>
     </>
   )
 }
+
 export default App

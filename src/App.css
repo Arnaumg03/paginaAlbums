@@ -802,3 +802,112 @@ textarea {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.site-footer {
+  margin-top: auto;
+  padding: 3rem 2rem 1rem;
+  background-color: #fafafa;
+  border-top: 1px solid #e5e7eb;
+  color: #4b5563;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.footer-social-link {
+  color: #111827;
+  font-size: 1.25rem;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer-social-link:hover {
+  color: #4f46e5;
+}
+
+.footer-bottom {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.footer-policy-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-policy-links a {
+  color: #6b7280;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease-out;
+}
+
+.footer-policy-links a:hover {
+  color: #111827;
+}
+
+.footer-payment-methods {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.footer-copyright {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.legal-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  width: 100%;
+}
+
+.legal-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #111827;
+  text-align: center;
+}
+
+.legal-content {
+  color: #374151;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.legal-content p {
+  margin-bottom: 1.25rem;
+}
+
+.legal-content h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.legal-content a {
+  color: #4f46e5;
+  text-decoration: underline;
+}
