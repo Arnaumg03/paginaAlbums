@@ -10,6 +10,7 @@ import anuelEmmanuel from '../fotosAlbumsProva/Anuel AA_Emmanuel.png'
 import jcReyesVivir from '../fotosAlbumsProva/JC Reyes_VIVIR PA QUEDARSE.png'
 import quevedoBuenasNoches1 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_ 1.png'
 import quevedoBuenasNoches2 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_2.png'
+import CheckoutButton from './components/CheckoutButton'
 
 function App() {
   const CONTACT_EMAIL = 'tu-email@ejemplo.com'
@@ -262,6 +263,7 @@ function App() {
   return (
     <>
       <div className="top-bar">
+        <title>Frame Sound Studio</title>
         <div className="top-bar-left">ESP | Español</div>
         <div className="top-bar-center">
           ENVÍO GRATUITO A PARTIR DE 59 € · ENTREGA EN 3–5 DÍAS LABORABLES
@@ -772,47 +774,14 @@ function App() {
               </p>
 
               <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
-                <label className="field" style={{ marginBottom: '1rem' }}>
-                  <span>Número de tarjeta</span>
-                  <input
-                    type="text"
-                    placeholder="0000 0000 0000 0000"
-                    style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box', fontFamily: 'monospace' }}
-                  />
-                </label>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <label className="field">
-                    <span>Caducidad</span>
-                    <input
-                      type="text"
-                      placeholder="MM/AA"
-                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box' }}
-                    />
-                  </label>
-                  <label className="field">
-                    <span>CVC</span>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      style={{ padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box' }}
-                    />
-                  </label>
-                </div>
+                {/* Ahora usamos Stripe Checkout mediante un botón que crea una sesión en el servidor */}
+                <CheckoutButton album={contactArtist ? { artist: contactArtist, album: contactAlbum } : null} options={contactOptions} cart={cart} />
               </div>
 
               <div style={{ backgroundColor: '#fefce8', padding: '1rem', borderRadius: '8px', border: '1px solid #fef08a', color: '#854d0e', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
                 Simulación de entorno de pruebas. Ningún cargo real se realizará.
               </div>
-
-              <button
-                type="button"
-                className="primary-button product-buy-button"
-                style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem', backgroundColor: '#10b981', color: 'white', border: 'none' }}
-                onClick={simulateFakePayment}
-              >
-                Pagar {contactOptions?.purchaseType === 'physical' ? '24,90 €' : '2,00 €'}
-              </button>
+              {/* El CheckoutButton ya redirige a Stripe. */}
             </div>
           </main>
         )}
@@ -983,7 +952,7 @@ function App() {
             className="floating-cta"
             onClick={openContactPage}
           >
-            ¿No encuentras tu cuadro?
+            ¿No encuentras el cuadro que buscas?
           </button>
         )}
       </div>
