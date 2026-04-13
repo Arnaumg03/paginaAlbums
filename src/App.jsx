@@ -13,7 +13,7 @@ import quevedoBuenasNoches2 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_2.pn
 import CheckoutButton from './components/CheckoutButton'
 
 function App() {
-  const CONTACT_EMAIL = 'tu-email@ejemplo.com'
+  const CONTACT_EMAIL = 'framesoundstudio@gmail.com'
   const [view, setView] = useState('list')
   const [activeAlbum, setActiveAlbum] = useState(null)
   const [frameSize, setFrameSize] = useState('30x40')
@@ -121,11 +121,12 @@ function App() {
         try {
           const purchaseData = JSON.parse(pendingPurchase)
           if (purchaseData.album) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setContactArtist(purchaseData.album.artist)
             setContactAlbum(purchaseData.album.album)
             setContactOptions(purchaseData.options)
           } else if (purchaseData.cart && purchaseData.cart.length > 0) {
-            // Para compras desde el carrito, usar el primer item como referencia
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             const firstItem = purchaseData.cart[0]
             setContactArtist(firstItem.album.artist)
             setContactAlbum(firstItem.album.album)
@@ -647,7 +648,7 @@ function App() {
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                      </svg>
+                    </svg>
                     </button>
                     <div className="album-image-wrapper">
                       <img
@@ -799,9 +800,6 @@ function App() {
                 <CheckoutButton album={contactArtist ? { artist: contactArtist, album: contactAlbum } : null} options={contactOptions} cart={cart} />
               </div>
 
-              <div style={{ backgroundColor: '#fefce8', padding: '1rem', borderRadius: '8px', border: '1px solid #fef08a', color: '#854d0e', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-                Simulación de entorno de pruebas. Ningún cargo real se realizará.
-              </div>
               {/* El CheckoutButton ya redirige a Stripe. */}
             </div>
           </main>
