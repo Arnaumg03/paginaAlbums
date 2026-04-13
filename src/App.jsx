@@ -267,11 +267,6 @@ function App() {
     window.history.pushState({ view: 'payment' }, '')
   }
 
-  function simulateFakePayment() {
-    setView('success')
-    window.history.pushState({ view: 'success' }, '')
-  }
-
   function submitContactRequest() {
     const subject = encodeURIComponent('Solicitud de nuevo cuadro personalizado')
     const bodyLines = [
