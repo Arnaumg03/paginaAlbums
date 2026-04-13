@@ -19,7 +19,7 @@ function App() {
   const [frameSize, setFrameSize] = useState('30x40')
   const [frameColor, setFrameColor] = useState('negro')
   const [activeArtistFilter, setActiveArtistFilter] = useState('todos')
-  const [purchaseType, setPurchaseType] = useState('physical')
+  const [purchaseType, setPurchaseType] = useState('digital')
 
   const [contactArtist, setContactArtist] = useState('')
   const [contactAlbum, setContactAlbum] = useState('')
@@ -404,7 +404,7 @@ function App() {
                       <div className="album-info">
                         <p className="album-artist">{sample.artist}</p>
                         <p className="album-title">{sample.album}</p>
-                        <p className="album-price">Desde 24,90 €</p>
+                        <p className="album-price">Desde 2 €</p>
                       </div>
                     </button>
                   ))}
@@ -457,7 +457,7 @@ function App() {
                     <div className="album-info">
                       <p className="album-artist">{sample.artist}</p>
                       <p className="album-title">{sample.album}</p>
-                      <p className="album-price">Desde 24,90 €</p>
+                      <p className="album-price">Desde 2 €</p>
                     </div>
                   </button>
                 ))}
@@ -507,7 +507,7 @@ function App() {
                       value={purchaseType}
                       onChange={(event) => setPurchaseType(event.target.value)}
                     >
-                      <option value="physical">Cuadro con marco (Físico)</option>
+                      <option value="physical" disabled>Cuadro con marco (Físico) - Todavía no disponible</option>
                       <option value="digital">Solo documento digital (JPG)</option>
                     </select>
                   </label>
