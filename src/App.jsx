@@ -273,7 +273,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('/.netlify/functions/send-contact-email', {
+      const response = await fetch('/api/send-contact-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -281,6 +281,7 @@ function App() {
         body: JSON.stringify({
           artist: contactArtist,
           album: contactAlbum,
+          email: contactEmail
         }),
       })
 
