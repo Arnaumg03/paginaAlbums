@@ -121,12 +121,10 @@ function App() {
         try {
           const purchaseData = JSON.parse(pendingPurchase)
           if (purchaseData.album) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setContactArtist(purchaseData.album.artist)
             setContactAlbum(purchaseData.album.album)
             setContactOptions(purchaseData.options)
           } else if (purchaseData.cart && purchaseData.cart.length > 0) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             const firstItem = purchaseData.cart[0]
             setContactArtist(firstItem.album.artist)
             setContactAlbum(firstItem.album.album)
@@ -268,18 +266,36 @@ function App() {
     window.history.pushState({ view: 'payment' }, '')
   }
 
-  function submitContactRequest() {
-    const subject = encodeURIComponent('Solicitud de nuevo cuadro personalizado')
-    const bodyLines = [
-      'Hola, no he encontrado el cuadro que busco en la web.',
-      '',
-      `Artista deseado: ${contactArtist}`,
-      `Álbum deseado: ${contactAlbum}`,
-    ].filter(Boolean).join('\n')
+  async function submitContactRequest() {
+    if (!contactArtist.trim() || !contactAlbum.trim()) {
+      alert('Por favor, rellena el nombre del artista y del álbum.')
+      return
+    }
 
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${encodeURIComponent(
-      bodyLines,
-    )}`
+    try {
+      const response = await fetch('/.netlify/functions/send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          artist: contactArtist,
+          album: contactAlbum,
+        }),
+      })
+
+      if (response.ok) {
+        alert('¡Solicitud enviada! Nos pondremos en contacto contigo pronto.')
+        setContactArtist('')
+        setContactAlbum('')
+      } else {
+        const error = await response.json()
+        alert('Error al enviar la solicitud: ' + (error.error || 'Error desconocido'))
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error al enviar la solicitud. Inténtalo de nuevo.')
+    }
   }
 
   return (
