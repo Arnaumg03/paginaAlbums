@@ -54,6 +54,10 @@ export default function CheckoutButton({ album, options, cart }) {
 
       console.log('Respuesta del servidor:', data)
 
+      // Guardar información de la compra en localStorage antes de redirigir
+      const purchaseInfo = cart && cart.length > 0 ? { cart } : { album, options }
+      localStorage.setItem('pendingPurchase', JSON.stringify(purchaseInfo))
+
       // Usar la URL de Checkout directamente (método recomendado por Stripe)
       if (data.url) {
         window.location.href = data.url

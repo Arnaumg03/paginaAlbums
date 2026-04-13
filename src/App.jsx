@@ -114,6 +114,32 @@ function App() {
       window.history.replaceState({ view: 'list' }, '')
     }
 
+    // Recuperar información de compra pendiente si estamos en la vista de success
+    if (window.location.search.includes('view=success')) {
+      const pendingPurchase = localStorage.getItem('pendingPurchase')
+      if (pendingPurchase) {
+        try {
+          const purchaseData = JSON.parse(pendingPurchase)
+          if (purchaseData.album) {
+            setContactArtist(purchaseData.album.artist)
+            setContactAlbum(purchaseData.album.album)
+            setContactOptions(purchaseData.options)
+          } else if (purchaseData.cart && purchaseData.cart.length > 0) {
+            // Para compras desde el carrito, usar el primer item como referencia
+            const firstItem = purchaseData.cart[0]
+            setContactArtist(firstItem.album.artist)
+            setContactAlbum(firstItem.album.album)
+            setContactOptions(firstItem.options)
+          }
+          // Limpiar la información después de usarla
+          localStorage.removeItem('pendingPurchase')
+        } catch (error) {
+          console.error('Error recuperando información de compra:', error)
+        }
+      }
+      setView('success')
+    }
+
     const handlePopState = (event) => {
       if (event.state && event.state.view) {
         setView(event.state.view)
