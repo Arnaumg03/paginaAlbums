@@ -794,8 +794,32 @@ function App() {
               Tu pedido de <strong>{contactArtist} - {contactAlbum}</strong> está confirmado.
               {contactOptions && contactOptions.purchaseType === 'physical'
                 ? ' Nos pondremos en contacto contigo pronto con el número de seguimiento.'
-                : ' Te enviaremos el documento JPG al correo proporcionado en breve.'}
+                : ' Tu imagen digital está lista para descargar.'}
             </p>
+
+            {contactOptions && contactOptions.purchaseType === 'digital' && (
+              <div style={{ marginBottom: '2rem' }}>
+                <button
+                  type="button"
+                  className="primary-button product-buy-button"
+                  style={{ marginBottom: '1rem', padding: '1rem 2rem', fontSize: '1.1rem' }}
+                  onClick={() => {
+                    const link = document.createElement('a')
+                    link.href = `/api/download/${encodeURIComponent(contactArtist || 'Unknown')}/${encodeURIComponent(contactAlbum || 'Unknown')}`
+                    link.download = `${contactArtist || 'Unknown'}-${contactAlbum || 'Unknown'}.png`
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                  }}
+                >
+                  📥 Descargar Imagen (JPG)
+                </button>
+                <p style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                  También recibirás un email con el enlace de descarga en las próximas horas.
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               className="primary-button product-buy-button"
