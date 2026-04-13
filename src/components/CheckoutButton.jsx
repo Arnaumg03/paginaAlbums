@@ -54,27 +54,13 @@ export default function CheckoutButton({ album, options, cart }) {
 
       console.log('Respuesta del servidor:', data)
 
-      // Si el backend devuelve una URL de Checkout (session.url) la usamos directamente (recomendado)
+      // Usar la URL de Checkout directamente (método recomendado por Stripe)
       if (data.url) {
         window.location.href = data.url
         return
       }
 
-      // Fallback: Si devuelve sessionId, usamos stripe.redirectToCheckout (método legado)
-      if (data.sessionId) {
-        const stripe = await stripePromise
-        if (!stripe) {
-          throw new Error('Error al cargar Stripe. Verifica tu clave pública.')
-        }
-
-        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: data.sessionId })
-        if (stripeError) {
-          throw new Error(stripeError.message || 'Error en Stripe')
-        }
-        return
-      }
-
-      throw new Error('Respuesta inválida del servidor: ni url ni sessionId recibidos')
+      throw new Error('Respuesta inválida del servidor: no se recibió URL de checkout')
     } catch (err) {
       console.error('Checkout error:', err)
       setError(err.message || 'Error inesperado durante el pago')
@@ -97,4 +83,3 @@ export default function CheckoutButton({ album, options, cart }) {
     </div>
   )
 }
-

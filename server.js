@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 // Inicializar Stripe
 let stripe = null
 if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' })
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' })
   console.log('✅ Stripe inicializado correctamente')
 } else {
   console.warn('⚠️ STRIPE_SECRET_KEY no configurada en .env.local')
