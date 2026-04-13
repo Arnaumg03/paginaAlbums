@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     })
 
     // Responder con sessionId para usar stripe.redirectToCheckout({ sessionId }) en frontend
-    return res.status(200).json({ sessionId: session.id })
+    return res.status(200).json({ url: session.url })
   } catch (err) {
     console.error('create-checkout-session error:', err)
     return res.status(500).json({ error: err.message })
