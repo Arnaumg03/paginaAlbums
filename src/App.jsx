@@ -41,6 +41,16 @@ const SAMPLE_ALBUMS = [
 
 const ARTISTS = Array.from(new Set(SAMPLE_ALBUMS.map((a) => a.artist)))
 
+// Los 4 artistas con más cuadros salen en la barra; el resto se busca con la lupa
+const albumCount = (artist) => SAMPLE_ALBUMS.filter((a) => a.artist === artist).length
+const FEATURED_ARTISTS = [...ARTISTS]
+    .sort((a, b) => albumCount(b) - albumCount(a))
+    .slice(0, 4)
+
+// Ignora mayúsculas y acentos al buscar
+const normalize = (s) =>
+    s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+
 // Vistas en las que NO se muestra el botón flotante "¿No encuentras el cuadro?"
 const HIDE_CTA_VIEWS = [
   'contact', 'checkout', 'payment', 'success', 'cart', 'favorites',
@@ -384,6 +394,9 @@ function App() {
   // Si volvemos de un pago correcto, la cesta empieza vacía
   const [cart, setCart] = useState(() => (isSuccessUrl() ? [] : readStorage('cart', [])))
 
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
   /* ----- Persistencia ----- */
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites))
@@ -392,6 +405,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart))
   }, [cart])
+
+  useEffect(() => {
+    document.title = 'Frame Sound Studio'
+  }, [])
 
   /* ----- Historial del navegador (sin setState síncrono) ----- */
   useEffect(() => {
@@ -428,6 +445,21 @@ function App() {
   function handleSelectSample(sample) {
     setActiveAlbum(sample)
     navigate('detail')
+  }
+
+  function closeSearch() {
+    setSearchOpen(false)
+    setSearchQuery('')
+  }
+
+  function handleSearchArtist(artist) {
+    handleFilterSelect(artist)
+    closeSearch()
+  }
+
+  function handleSearchAlbum(sample) {
+    closeSearch()
+    handleSelectSample(sample)
   }
 
   const goBack = () => window.history.back()
@@ -551,6 +583,19 @@ function App() {
       ? cart.find((it) => sameCartItem(it, activeAlbum, { purchaseType, frameSize, frameColor }))
       : null
 
+  const q = normalize(searchQuery)
+  // Sin texto, la lupa lista todos los artistas para poder explorarlos
+  const matchingArtists = ARTISTS.filter((a) => normalize(a).includes(q))
+  const matchingAlbums = q
+      ? SAMPLE_ALBUMS.filter((a) => normalize(a.album).includes(q))
+      : []
+
+  // Si eliges un artista que no está en la barra, aparece como activo temporalmente
+  const navArtists =
+      activeArtistFilter !== 'todos' && !FEATURED_ARTISTS.includes(activeArtistFilter)
+          ? [...FEATURED_ARTISTS, activeArtistFilter]
+          : FEATURED_ARTISTS
+
   const successArtist = pending?.album?.artist ?? ''
   const successAlbum = pending?.album?.album ?? ''
   const successOptions = pending?.options ?? null
@@ -616,7 +661,7 @@ function App() {
             <span className="logo-secondary">Studio</span>
           </div>
           <nav className="main-nav">
-            {['todos', ...ARTISTS].map((artist) => (
+            {['todos', ...navArtists].map((artist) => (
                 <button
                     key={artist}
                     type="button"
@@ -627,6 +672,90 @@ function App() {
                 </button>
             ))}
           </nav>
+
+          <div className="header-actions" style={{ position: 'relative' }}>
+            <button
+                type="button"
+                className="icon-button"
+                aria-label="Buscar artista o álbum"
+                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen((open) => !open)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+
+            {searchOpen && (
+                <>
+                  {/* Fondo invisible: al hacer clic fuera se cierra el buscador */}
+                  <div onClick={closeSearch} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+                  <div
+                      style={{
+                        position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 50,
+                        width: 'min(340px, 90vw)', background: 'white', borderRadius: 8,
+                        border: '1px solid #e5e7eb', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', padding: '0.75rem',
+                      }}
+                  >
+                    <input
+                        type="search"
+                        autoFocus
+                        placeholder="Buscar artista o álbum..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
+                        style={inputStyle}
+                    />
+
+                    <div style={{ maxHeight: 280, overflowY: 'auto', marginTop: '0.5rem' }}>
+                      {matchingArtists.length > 0 && (
+                          <>
+                            <p style={{ margin: '0.5rem 0 0.25rem', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase' }}>
+                              Artistas
+                            </p>
+                            {matchingArtists.map((artist) => (
+                                <button
+                                    key={artist}
+                                    type="button"
+                                    onClick={() => handleSearchArtist(artist)}
+                                    style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', font: 'inherit', borderRadius: 4 }}
+                                >
+                                  {artist}
+                                </button>
+                            ))}
+                          </>
+                      )}
+
+                      {matchingAlbums.length > 0 && (
+                          <>
+                            <p style={{ margin: '0.5rem 0 0.25rem', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase' }}>
+                              Álbumes
+                            </p>
+                            {matchingAlbums.map((sample) => (
+                                <button
+                                    key={albumKey(sample)}
+                                    type="button"
+                                    onClick={() => handleSearchAlbum(sample)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: '0.4rem 0.5rem', cursor: 'pointer', font: 'inherit', borderRadius: 4 }}
+                                >
+                                  <img src={sample.cover} alt="" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 4 }} />
+                                  <span>{sample.album} <small style={{ color: '#6b7280' }}>· {sample.artist}</small></span>
+                                </button>
+                            ))}
+                          </>
+                      )}
+
+                      {matchingArtists.length === 0 && matchingAlbums.length === 0 && (
+                          <p style={{ color: '#6b7280', fontSize: '0.9rem', padding: '0.5rem' }}>
+                            Sin resultados. Si no encuentras tu cuadro, pídelo con el botón de abajo.
+                          </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+            )}
+          </div>
         </header>
 
         <div className="page">
