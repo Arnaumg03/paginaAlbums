@@ -25,11 +25,11 @@ const PRICES = { digital: 2, physical: 24.9 }
 const formatPrice = (n) =>
     n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
 
-const SAMPLE_ALBUMS = [
-  { artist: 'Bad Bunny', album: 'Un Verano Sin Ti', style: 'colorful', cover: badBunnyUnVerano, isNew: true },
-  { artist: 'Bad Bunny', album: 'YHLQMDLG', style: 'colorful', cover: badBunnyYhlqmdlg, isNew: true },
-  { artist: 'Bad Bunny', album: 'DEBI TIRAR MAS FOTOS', style: 'colorful', cover: badBunnyDebiTirarMasFotos1, isNew: true },
-  { artist: 'Bad Bunny', album: 'DEBI TIRAR MAS FOTOS', style: 'colorful', cover: badBunnyDebiTirarMasFotos2, isNew: true },
+const RAW_ALBUMS = [
+  { artist: 'Bad Bunny', album: 'Un Verano Sin Ti', style: 'colorful', cover: badBunnyUnVerano},
+  { artist: 'Bad Bunny', album: 'YHLQMDLG', style: 'colorful', cover: badBunnyYhlqmdlg},
+  { artist: 'Bad Bunny', album: 'DEBI TIRAR MAS FOTOS', style: 'colorful', cover: badBunnyDebiTirarMasFotos1},
+  { artist: 'Bad Bunny', album: 'DEBI TIRAR MAS FOTOS', style: 'colorful', cover: badBunnyDebiTirarMasFotos2},
   { artist: 'Mora', album: 'ESTRELLA', style: 'minimal', cover: moraEstrella },
   { artist: 'Mora', album: 'LO MISMO DE SIEMPRE', style: 'dark', cover: moraLoMismo },
   { artist: 'Anuel AA', album: 'Emmanuel', style: 'dark', cover: anuelEmmanuel },
@@ -38,6 +38,12 @@ const SAMPLE_ALBUMS = [
   { artist: 'Quevedo', album: 'BUENAS NOCHES (versión 2)', style: 'colorful', cover: quevedoBuenasNoches2 },
   { artist: 'Lucho RK', album: 'SORDE DE UN PIE', style: 'colorful', cover: luchoSordoDeUnPie },
 ]
+// Los últimos NEW_COUNT álbumes de la lista son las novedades
+const NEW_COUNT = 4
+const SAMPLE_ALBUMS = RAW_ALBUMS.map((album, i) => ({
+  ...album,
+  isNew: i >= RAW_ALBUMS.length - NEW_COUNT,
+}))
 
 const ARTISTS = Array.from(new Set(SAMPLE_ALBUMS.map((a) => a.artist)))
 
@@ -577,7 +583,8 @@ function App() {
       activeArtistFilter === 'todos'
           ? SAMPLE_ALBUMS
           : SAMPLE_ALBUMS.filter((a) => a.artist === activeArtistFilter)
-  const newAlbums = filteredAlbums.filter((a) => a.isNew)
+
+  const newAlbums = filteredAlbums.filter((a) => a.isNew).reverse()
 
   const itemInCart = activeAlbum
       ? cart.find((it) => sameCartItem(it, activeAlbum, { purchaseType, frameSize, frameColor }))
