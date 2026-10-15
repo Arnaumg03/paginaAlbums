@@ -10,6 +10,7 @@ import anuelEmmanuel from '../fotosAlbumsProva/Anuel AA_Emmanuel.png'
 import jcReyesVivir from '../fotosAlbumsProva/JC Reyes_VIVIR PA QUEDARSE.png'
 import quevedoBuenasNoches1 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_ 1.png'
 import quevedoBuenasNoches2 from '../fotosAlbumsProva/Quevedo_BUENAS NOCHES_2.png'
+import luchoSordoDeUnPie from '../fotosAlbumsProva/lucho RK_SORDO DE UN PIE.png'
 import CheckoutButton from './components/CheckoutButton'
 
 /* ------------------------------------------------------------------ */
@@ -35,6 +36,7 @@ const SAMPLE_ALBUMS = [
   { artist: 'JC Reyes', album: 'VIVIR PA QUEDARSE', style: 'vintage', cover: jcReyesVivir },
   { artist: 'Quevedo', album: 'BUENAS NOCHES (versión 1)', style: 'colorful', cover: quevedoBuenasNoches1 },
   { artist: 'Quevedo', album: 'BUENAS NOCHES (versión 2)', style: 'colorful', cover: quevedoBuenasNoches2 },
+  { artist: 'Lucho RK', album: 'SORDE DE UN PIE', style: 'colorful', cover: luchoSordoDeUnPie },
 ]
 
 const ARTISTS = Array.from(new Set(SAMPLE_ALBUMS.map((a) => a.artist)))
